@@ -11,7 +11,8 @@
 
 (def state (atom {:active-cursor? true 
                   :actual ""
-                  :expected "hello world"}))
+                  :expected "hello world hello world hello world hello world"}))
+
 
 (def io-chan (chan))
 
@@ -31,15 +32,20 @@
 
 (def io-consumer (go-loop [future-blink (now)]
                    (m/match (<! io-chan)
-                            ["tick"] (if (and (:active-cursor? @state) (< (now) future-blink))
-                                       (recur (now debounce))
-                                       (swap! state update-in [:active-cursor?] not))
-                            ["backspace"] (swap! state update-in [:actual] delete-char) 
+                            ["tick"] (if (< (now) future-blink)
+                                       (recur future-blink)
+                                       (do
+                                         (swap! state update-in [:active-cursor?] not)
+                                         (recur (now debounce))))
+                            ["backspace"] (do
+                                            (swap! state assoc :active-cursor? true)
+                                            (swap! state update-in [:actual] delete-char)
+                                            (recur (now debounce))) 
                             ["char" c] (do (swap! state assoc :active-cursor? true)
                                            (when (< (->> @state :actual count)
                                                     (->> @state :expected count))
-                                             (swap! state update-in [:actual] str c))))
-                   (recur future-blink)))
+                                             (swap! state update-in [:actual] str c))
+                                           (recur (now debounce))))))
 
 (defn char-key [idx active-cursor?
                 {:keys [key correct?] :as letter}]
