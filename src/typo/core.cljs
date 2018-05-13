@@ -34,18 +34,14 @@
                    (m/match (<! io-chan)
                             ["tick"] (if (< (now) future-blink)
                                        (recur future-blink)
-                                       (do
-                                         (swap! state update-in [:active-cursor?] not)
-                                         (recur (now debounce))))
-                            ["backspace"] (do
-                                            (swap! state assoc :active-cursor? true)
-                                            (swap! state update-in [:actual] delete-char)
-                                            (recur (now debounce))) 
+                                       (swap! state update-in [:active-cursor?] not))
+                            ["backspace"] (do (swap! state assoc :active-cursor? true)
+                                              (swap! state update-in [:actual] delete-char)) 
                             ["char" c] (do (swap! state assoc :active-cursor? true)
                                            (when (< (->> @state :actual count)
                                                     (->> @state :expected count))
-                                             (swap! state update-in [:actual] str c))
-                                           (recur (now debounce))))))
+                                             (swap! state update-in [:actual] str c))))
+                   (recur (now debounce))))
 
 (defn char-key [idx active-cursor?
                 {:keys [key correct?] :as letter}]
