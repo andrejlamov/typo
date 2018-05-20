@@ -8,7 +8,8 @@
                  [org.clojure/core.async "0.4.474"]
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [org.clojure/test.check "0.9.0"]
-                 [rum "0.11.2"]]
+                 [rum "0.11.2"]
+                 [datascript "0.16.5"]]
 
   :plugins [[lein-figwheel "0.5.16"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
