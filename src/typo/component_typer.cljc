@@ -25,7 +25,7 @@
        (drop-last 1)
        (string/join)))
 
-(defn tick [conn]
+(defn on-tick [conn]
   (let [{:keys [cursor/visible?]}
         (d/pull (d/db conn)
                 '[:cursor/visible?]
@@ -33,7 +33,7 @@
     (d/transact! conn [{:component/name 'typo/typer
                         :cursor/visible? (not visible?)}])))
 
-(defn backspace [conn]
+(defn on-backspace [conn]
   (let [{:keys [text/actual]}
         (d/pull (d/db conn)
                 '[:text/actual]
@@ -56,9 +56,9 @@
         (m/match (<! out-chan)
                  {:event "500ms-tick"} (if (< (now-fn) future-blink)
                                          (recur future-blink)
-                                         (do (tick conn)
+                                         (do (on-tick conn)
                                              (recur (now-fn debounce)) ))
-                 {:event "backspace"} (do (backspace conn)
+                 {:event "backspace"} (do (on-backspace conn)
                                           (recur (now-fn debounce)))
                  {:event "char" :data c} (do (on-char conn c)
                                              (recur (now-fn debounce)))))))
@@ -87,7 +87,7 @@
                    :else "white")]
     [:span {:key idx :style {:color fg-color :background bg-color}} key]))
 
-(defn main [conn io-chan]
+(defn main [conn]
   (let [{:keys [:text/actual
                 :text/expected
                 :cursor/visible?]}

@@ -3,7 +3,6 @@
    [clojure.core.async :as as :refer [put! <! sub pub chan go-loop]]))
 
 (def in-chan (chan))
-(def out-chan (chan))
 (def io-pub (pub in-chan :topic))
 
 #?(:cljs

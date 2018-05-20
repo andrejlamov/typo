@@ -6,7 +6,7 @@
             [typo.io :as io :refer [io-pub]]))
 
 (rum/defc root []
-  (typer/main conn io-pub))
+  (typer/main conn))
 
 (defn mount []
   (rum/mount (root) (. js/document getElementById "root")))
