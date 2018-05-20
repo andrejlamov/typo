@@ -79,7 +79,7 @@
      (sub io-pub "io" out-chan)
      (io-consumer name out-chan conn now)))
 
-(defn main [conn name]
+(defn main [name conn]
    (let [{:keys [:text/actual
                 :text/expected
                 :cursor/visible?]}

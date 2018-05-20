@@ -18,7 +18,7 @@
                 (typer/spawn-io-consumer 'typo.component/typer1 conn io-pub (chan))
 
                 (rum/defc root []
-                  (typer/main conn 'typo.component/typer1))
+                  (typer/main 'typo.component/typer1 conn))
 
                 (defn mount []
                   (rum/mount (root) (. js/document getElementById "root")))
