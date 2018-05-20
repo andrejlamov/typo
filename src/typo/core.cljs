@@ -1,18 +1,33 @@
 (ns typo.core
   (:require [rum.core :as rum]
-            [typo.component-typer :as typer]
-            [typo.db :refer [conn]]
+            [typo.component.typer :as typer]
+            [typo.db :refer [schema]]
             [datascript.core :as d]
-            [typo.io :as io :refer [io-pub]]))
+            [clojure.core.async :as as :refer [put! <! sub pub chan go-loop]]
+            [typo.io :as io]))
 
-(rum/defc root []
-  (typer/main conn))
 
-(defn mount []
-  (rum/mount (root) (. js/document getElementById "root")))
+(defonce wire (do
+                (def conn (d/create-conn schema))
 
-(d/listen! conn :mount #(mount))
+                (def in-chan (chan))
+                (io/init-producers in-chan)
 
+                (def io-pub (pub in-chan :topic))
+
+                (typer/spawn-io-consumer 'typo.component/typer1 conn io-pub (chan))
+
+                (rum/defc root []
+                  (typer/main conn 'typo.component/typer1))
+
+                (defn mount []
+                  (rum/mount (root) (. js/document getElementById "root")))
+
+                (d/listen! conn :mount #(mount))
+
+                ;; init some data
+                (d/transact! conn [{:component/name 'typo.component/typer1
+                                    :text/expected "hello world"}])))
 (mount)
 
 (defn on-js-reload []

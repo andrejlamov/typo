@@ -1,22 +1,12 @@
-(ns typo.component-typer
+(ns typo.component.typer
   (:require [datascript.core :as d]
             [clojure.string :as string]
             [typo.util :as u]
-            [typo.io :refer [io-pub]]
-            [typo.db :refer [conn]]
             [clojure.spec.alpha :as s]
             [clojure.core.match :as m]
             [clojure.core.async :as as :refer [put! <! sub pub chan go]]))
 
 (def debounce 300)
-
-(defonce out-chan (chan))
-
-(sub io-pub "io" out-chan)
-
-;; init some data
-(d/transact! conn [{:component/name 'typo/typer
-                    :text/expected "hello world"}])
 
 (s/fdef delete-char
   :args (s/cat :text string?))
@@ -25,51 +15,43 @@
        (drop-last 1)
        (string/join)))
 
-(defn on-tick [conn]
+(defn on-tick [name conn]
   (let [{:keys [cursor/visible?]}
         (d/pull (d/db conn)
                 '[:cursor/visible?]
-                [:component/name 'typo/typer])]
-    (d/transact! conn [{:component/name 'typo/typer
+                [:component/name name])]
+    (d/transact! conn [{:component/name name
                         :cursor/visible? (not visible?)}])))
 
-(defn on-backspace [conn]
+(defn on-backspace [name conn]
   (let [{:keys [text/actual]}
         (d/pull (d/db conn)
                 '[:text/actual]
-                [:component/name 'typo/typer])]
-    (d/transact! conn [{:component/name 'typo/typer
+                [:component/name name])]
+    (d/transact! conn [{:component/name name
                         :text/actual (delete-char actual)
                         :cursor/visible? true}])))
 
-(defn on-char [conn c]
+(defn on-char [name conn c]
   (let [{:keys [text/actual]}
         (d/pull (d/db conn)
                 '[:cursor/visible? :text/actual]
-                [:component/name 'typo/typer])]
-    (d/transact! conn [{:component/name 'typo/typer
+                [:component/name name])]
+    (d/transact! conn [{:component/name name
                         :text/actual (str actual c)
                         :cursor/visible? true}])))
 
-(defn io-consumer [now-fn conn]
+(defn io-consumer [name out-chan conn now-fn]
   (go (loop [future-blink (now-fn debounce)]
         (m/match (<! out-chan)
                  {:event "500ms-tick"} (if (< (now-fn) future-blink)
                                          (recur future-blink)
-                                         (do (on-tick conn)
+                                         (do (on-tick name conn)
                                              (recur (now-fn debounce)) ))
-                 {:event "backspace"} (do (on-backspace conn)
+                 {:event "backspace"} (do (on-backspace name conn)
                                           (recur (now-fn debounce)))
-                 {:event "char" :data c} (do (on-char conn c)
+                 {:event "char" :data c} (do (on-char name conn c)
                                              (recur (now-fn debounce)))))))
-
-#?(:cljs
-   (defn now
-     ([addition] (+ addition (now)))
-     ([] (.getTime (js/Date.)))))
-
-#?(:cljs
-   (defonce start (io-consumer now conn)))
 
 (defn key-char [idx active-cursor?
                 {:keys [key correct?]}]
@@ -87,11 +69,21 @@
                    :else "white")]
     [:span {:key idx :style {:color fg-color :background bg-color}} key]))
 
-(defn main [conn]
-  (let [{:keys [:text/actual
+#?(:cljs
+   (defn now
+     ([addition] (+ addition (now)))
+     ([] (.getTime (js/Date.)))))
+
+#?(:cljs
+   (defn spawn-io-consumer [name conn io-pub out-chan]
+     (sub io-pub "io" out-chan)
+     (io-consumer name out-chan conn now)))
+
+(defn main [conn name]
+   (let [{:keys [:text/actual
                 :text/expected
                 :cursor/visible?]}
-        (d/pull (d/db conn) '[*] [:component/name 'typo/typer])]
+        (d/pull (d/db conn) '[*] [:component/name name])]
     [:div {:style
            {:position "relative"
             :margin "0 auto"

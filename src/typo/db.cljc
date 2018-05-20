@@ -6,5 +6,4 @@
              :text/expected nil
              :cursor/visible? nil})
 
-(defonce conn (d/create-conn schema))
 
