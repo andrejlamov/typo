@@ -31,29 +31,31 @@
 (defn screen [st]
   (r/create-class
    {:component-did-mount #(let [input-elem (.. (r/dom-node %)
-                                               (querySelector "input"))
-                                screen-elem (.. (r/dom-node %)
-                                                (querySelector "div"))
-                                height (.-offsetHeight screen-elem)
-                                width (.-offsetWidth screen-elem)
-                                input-style (.. input-elem -style)]
-                            (set! (.-height input-style) (str height "px"))
-                            (set! (.-width input-style) (str width "px")))
-    :reagent-render (fn [] [:div [:input {:type "text"
-                                          :style {:opacity 0
-                                                  :position "absolute"}
-                                          :value (:actual-text @st)
-                                          :on-change #(let [text (-> % .-target .-value)]
-                                                        (swap! st assoc-in [:actual-text] text))}]
-                            [:div.screen (text @st)]])}))
+                                              (querySelector "textarea"))
+                               screen-elem (.. (r/dom-node %)
+                                               (querySelector "div"))
+                               height (.-offsetHeight screen-elem)
+                               width (.-offsetWidth screen-elem)
+                               input-style (.. input-elem -style)]
+                           (set! (.-height input-style) (str height "px"))
+                           (set! (.-width input-style) (str width "px")))
+    :reagent-render (fn [] [:div.screen [:textarea {:type "text"
+                                                    :style {:opacity 0
+                                                            :padding 0
+                                                            :border 0
+                                                            :color "transparent"
+                                                            :position "absolute"}
+                                                    :value (:actual-text @st)
+                                                    :on-change #(let [text (-> % .-target .-value)]
+                                                                  (swap! st assoc-in [:actual-text] text))}]
+                            [:div (text @st)]])}))
 
 
 
-(defn typo [st]
-  [:div [screen st]])
+
 
 (defn root []
-  [:div [typo state] [:p {}@state]])
+  [:div [screen state] [:p {}@state]])
 
 (defn render []
   (r/render [root]
