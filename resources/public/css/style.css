@@ -1,2 +1,34 @@
-/* some style */
+.screen {
+    max-width: 100px;
+    font-family: monospace;
+}
 
+.char {
+    color: black;
+    background: white;
+    white-space: pre-wrap;
+}
+
+.space {
+    text-decoration: underline;
+    opacity: 0.1;
+}
+
+.cursor {
+    color: white;
+    background: black;
+    opacity: 1;
+    text-decoration: none;
+}
+
+.correct {
+    background: green;
+    opacity: 1;
+    text-decoration: none;
+}
+
+.wrong {
+    opacity: 1;
+    text-decoration: none;
+    background: red;
+}

@@ -4,7 +4,8 @@
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [org.clojure/clojurescript "1.10.238"]
                  [org.clojure/core.async  "0.4.474"]
-                 [http-kit "2.2.0"]]
+                 [http-kit "2.2.0"]
+                 [reagent "0.8.1"]]
 
   :plugins [[lein-figwheel "0.5.16"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
@@ -39,7 +40,6 @@
                                   [figwheel-sidecar "0.5.16"]
                                   [cider/piggieback "0.3.1"]]
                    :source-paths ["src"]
-                   :plugins [[cider/cider-nrepl "0.17.0"]]
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
                    :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                                      :target-path]}})
