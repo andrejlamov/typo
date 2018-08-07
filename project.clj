@@ -6,7 +6,10 @@
                  [org.clojure/core.async  "0.4.474"]
                  [http-kit "2.2.0"]
                  [reagent "0.8.1"]
-                 [json-html "0.4.4"]]
+                 [json-html "0.4.4"]
+                 [ring "1.7.0-RC1"]
+                 [ring/ring-defaults "0.3.2"]
+                 [compojure "1.6.1"]]
 
   :plugins [[lein-figwheel "0.5.16"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
@@ -33,8 +36,7 @@
                            :pretty-print false}}]}
 
   :figwheel {:css-dirs ["resources/public/css"] ;; watch and update CSS
-             ;; :ring-handler typo.server/handler
-             }
+             :ring-handler typo.core/handler}
 
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.9"]
