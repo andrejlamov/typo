@@ -3,6 +3,12 @@
             [json-html.core :as h]
             [clojure.string :as string]))
 
+(def ws (doto (js/WebSocket. "ws://localhost:3449/ws")
+          (aset "onmessage" #(println (cljs.reader/read-string (aget % "data"))))
+          (aset "onopen" #(js/console.log %))))
+
+(defn send [d]
+  (.send ws (pr-str d)))
 (def state (r/atom {:expected-text "Hello world! How are you today?"
                     :idx 0
                     :actual-text ""}))
