@@ -37,7 +37,6 @@
    {:style {:opacity 0
             :padding 0
             :border 0
-            :color "transparent"
             :position "relative"}
     :on-key-down #(let [selectionStart (.. % -selectionStart)]
                     (swap! st assoc :idx selectionStart))
