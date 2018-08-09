@@ -1,0 +1,43 @@
+body {
+    font-family: "Source Code Pro";
+    font-size: 16px;
+}
+
+textarea {
+    font-family: "Source Code Pro";
+    font-size: 16px;
+}
+
+.screen {
+    max-width: 200px;
+}
+
+.char {
+    color: black;
+    background: white;
+    white-space: pre-wrap;
+}
+
+.space {
+    text-decoration: underline;
+    opacity: 0.1;
+}
+
+.cursor {
+    color: white;
+    background: black;
+    opacity: 1;
+    text-decoration: none;
+}
+
+.correct {
+    background: green;
+    opacity: 1;
+    text-decoration: none;
+}
+
+.wrong {
+    opacity: 1;
+    text-decoration: none;
+    background: red;
+}
