@@ -16,6 +16,9 @@
 (defroutes app-routes
   (GET "/hello" [] "Hello compojure!")
   (GET "/ws" [] ws-handler)
+  (GET "/json.human.css" [] {:status 200
+                             :headers {"Content-Type" "text/css"}
+                           :body (-> "json.human.css" clojure.java.io/resource slurp)})
   (route/resources "/" {:root "public"})
   (route/not-found "Not found"))
 

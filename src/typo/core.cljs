@@ -69,7 +69,7 @@
                             [:div.screen (text @st)]
                             [input st]])}))
 (defn root []
-  [:div [screen state]])
+  [:div [screen state] (h/edn->hiccup @state)])
 
 (defn render []
   (r/render [root]
