@@ -63,14 +63,20 @@
     :else
     {:actual-text current-text}))
 
-(defn layout-text-input [o st]
+(defn update-diff [st o]
   (let [screen-elem (.. (r/dom-node o)
-                        (querySelector ".screen"))
+                        (querySelector ".diff"))
         height (.-offsetHeight screen-elem)
         width (.-offsetWidth screen-elem)]
     (swap! st merge {:screen
                      {:height height
                       :width width}})))
+
+(defn update-idx [st o]
+  (let [selectionStart (.. (r/dom-node o)
+                         (querySelector ".input")
+                         -selectionStart)]
+    (swap! st assoc :idx selectionStart)))
 
 (defn input [st]
   [:textarea.input
@@ -98,15 +104,11 @@
 
 (defn screen [st]
   (r/create-class
-   {:component-will-update #(let [selectionStart (.. (r/dom-node %)
-                                                     (querySelector ".input")
-                                                     -selectionStart)]
-                              (println "will update")
-                              (layout-text-input % st)
-                              (swap! st merge {:idx selectionStart}))
-    :component-did-mount #(layout-text-input % st)
+   {:component-will-update #(do (update-diff st %)
+                                (update-idx st %))
+    :component-did-mount #(update-diff st %)
     :reagent-render (fn [] [:div
-                            [:div.screen (text @st)]
+                            [:div.diff (text @st)]
                             [input st]])}))
 (defn root []
   [:div [screen state] (h/edn->hiccup @state)])
