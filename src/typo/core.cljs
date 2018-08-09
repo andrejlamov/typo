@@ -107,7 +107,7 @@
    {:component-will-update #(do (update-diff st %)
                                 (update-idx st %))
     :component-did-mount #(update-diff st %)
-    :reagent-render (fn [] [:div
+    :reagent-render (fn [] [:div.screen
                             [:div.diff (text @st)]
                             [input st]])}))
 (defn root []
