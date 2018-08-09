@@ -61,8 +61,7 @@
       {:actual-text (string/join c)})
 
     :else
-    {:actual-text current-text
-     :current-idx current-idx}))
+    {:actual-text current-text}))
 
 (defn layout-text-input [o st]
   (let [screen-elem (.. (r/dom-node o)
@@ -102,8 +101,9 @@
    {:component-will-update #(let [selectionStart (.. (r/dom-node %)
                                                      (querySelector ".input")
                                                      -selectionStart)]
-                              (swap! st assoc :idx selectionStart))
-    :component-did-update #(layout-text-input % st)
+                              (println "will update")
+                              (layout-text-input % st)
+                              (swap! st merge {:idx selectionStart}))
     :component-did-mount #(layout-text-input % st)
     :reagent-render (fn [] [:div
                             [:div.screen (text @st)]
