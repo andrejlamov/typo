@@ -63,50 +63,47 @@
     :else
     {:actual-text current-text}))
 
-(defn update-diff [st o]
-  (let [screen-elem (.. (r/dom-node o)
-                        (querySelector ".diff"))
-        height (.-offsetHeight screen-elem)
-        width (.-offsetWidth screen-elem)]
-    (swap! st merge {:screen
-                     {:height height
-                      :width width}})))
-
-(defn update-idx [st o]
-  (let [selectionStart (.. (r/dom-node o)
-                         (querySelector ".input")
-                         -selectionStart)]
-    (swap! st assoc :idx selectionStart)))
-
 (defn input [st]
-  [:textarea.input
-   {:style
-    {:opacity 0
-     :padding 0
-     :border 0
-     :top (str (- (get-in @st [:screen :height])) "px")
-     :height (str (get-in @st [:screen :height]) "px")
-     :width (str (get-in @st [:screen :width]) "px")
-     :position "relative"}
-    :type "text"
-    :on-key-down #(let []
-                    (swap! st merge {:_force-rerender (js/Date.now)}))
-    :on-input #(let [target (.. % -target)
-                     current-text (.. target -value)
-                     prev-idx (:idx @st)
-                     prev-text (:actual-text @st)
-                     current-idx (aget target "selectionStart")
-                     sub-state (handle-text-input current-text prev-text current-idx prev-idx)]
-                 (swap! st merge sub-state)
-                 (aset target "value" (:actual-text @st))
-                 (aset target "selectionStart" current-idx)
-                 (aset target "selectionEnd" current-idx))}])
+  (let [diff-view (:diff-view @st)]
+    [:textarea.input
+     {:style
+      {:opacity 0
+       :padding 0
+       :border 0
+       :top (str (- (:height diff-view)) "px")
+       :height (str (:height diff-view) "px")
+       :width (str (:width diff-view) "px")
+       :position "relative"}
+      :type "text"
+      :on-key-down #(let []
+                      (swap! st merge {:_force-rerender (js/Date.now)}))
+      :on-input #(let [target (.. % -target)
+                       current-text (.. target -value)
+                       prev-idx (:idx @st)
+                       prev-text (:actual-text @st)
+                       current-idx (aget target "selectionStart")
+                       sub-state (handle-text-input current-text prev-text current-idx prev-idx)]
+                   (swap! st merge sub-state)
+                   (aset target "value" (:actual-text @st))
+                   (aset target "selectionStart" current-idx)
+                   (aset target "selectionEnd" current-idx))}]))
+
+(defn get-diff-view-size [o]
+  (let [screen-elem (.. (r/dom-node o)
+                        (querySelector ".diff"))]
+    {:height (.-offsetHeight screen-elem)
+     :width (.-offsetWidth screen-elem)}))
+
+(defn get-input-caret-idx[o]
+  (.. (r/dom-node o)
+      (querySelector ".input")
+      -selectionStart))
 
 (defn screen [st]
   (r/create-class
-   {:component-will-update #(do (update-diff st %)
-                                (update-idx st %))
-    :component-did-mount #(update-diff st %)
+   {:component-will-update #(do (swap! st merge {:diff-view (get-diff-view-size %)})
+                                (swap! st assoc :idx (get-input-caret-idx %)))
+    :component-did-mount #(swap! st merge {:diff-view (get-diff-view-size %)})
     :reagent-render (fn [] [:div.screen
                             [:div.diff (text @st)]
                             [input st]])}))
